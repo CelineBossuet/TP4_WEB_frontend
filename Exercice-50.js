@@ -1,10 +1,20 @@
 /* Base URL of the web-service for the current user and access token */
 const backend = "https://cawrest.ensimag.fr" // replace by the backend to use
-const token = "TOKEN" //replace by yout token : go to BACKEND/getjwsDeleg/caw to obtain it
-const wsBase = `${backend}/bmt/USER/` // replace USER by your login used tu obtain TOKEN
+const token = "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyIjoiZG9yY2hlbmMiLCJkZWxlZyI6Im5vdC1kZWZpbmVkIn0.LwtktJF8T4CxqhmpHW97S9SMdoSHl3LXRy2xybAZ6Go" //replace by yout token : go to BACKEND/getjwsDeleg/caw to obtain it
+const wsBase = `${backend}/bmt/dorchenc/` // replace USER by your login used tu obtain TOKEN
+const whoami = "/whoami"
+
 /* Shows the identity of the current user */
 function setIdentity() {
 	//TODO 1
+	let x = fetch ( backend + whoami, {method: 'GET', headers: {"x-access-token": token}})
+	.then(res => res.json())
+	console.log(x)
+
+	let content = document.getElementsByClassName("identity")
+	content.item(0).appendChild(document.createTextNode(x))
+
+
 }
 
 /* Sets the height of <div id="#contents"> to benefit from all the remaining place on the page */
