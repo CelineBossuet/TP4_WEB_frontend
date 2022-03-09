@@ -180,13 +180,14 @@ window.addEventListener('load', miseEnPlace, false)
 
 window.onload = function () {
 	// click sur new tag
-	document.getElementById("addTag").addEventListener("click", addTag, false)
+	document.getElementById("addTag").addEventListener("click", addTag)
 
 	// click sur un item
-	const items = document.querySelector("#items").childNodes
+	const items = document.querySelectorAll("#items div")
+	console.log(document.querySelectorAll("#items"))
 	console.log(items)
-	for (let i = 0; i < items.length; i ++){
-		let item = items[i]
+
+	for (item in items.values()){
 		console.log("aaa")
 		console.log(item)
 		item.addEventListener("click", () => clickTag(item))
