@@ -72,7 +72,7 @@ function listBookmarks() {
 }
 
 // fonction qui retire tous les enfants d'un noeud
-function removeAll(node){
+function removeAll(node) {
 	while (node.childNodes.length != 0) {
 		node.removeChild(node.firstChild)
 	}
@@ -95,10 +95,7 @@ function traiteListeTags(liste) {
 		//copie.setAttribute(num, liste[item].id)
 
 		// ajoute à l'élément d'id items
-		console.log(document.getElementById("items"))
 		document.getElementById("items").appendChild(copie)
-		console.log(copie)
-
 	}
 }
 
@@ -106,14 +103,18 @@ function traiteListeTags(liste) {
 function listTags() {
 	console.log("listTags called")
 
-	// TODO on vide l'id items
+	// on vide l'id items
 	removeAll(document.getElementById("items"))
 
 	// on va chercher dans l'url la liste de tous les tags
-	console.log(wsBase + tags)
-	fetch(wsBase + tags, { method: 'GET', headers: { "x-access-token": token } })
+	fetch(
+		wsBase + tags,
+		{
+			method: 'GET',
+			headers: { "x-access-token": token }
+		})
 		.then(res => res.json())
-		.then(json => { console.log(json.data); traiteListeTags(json.data) })
+		.then(json => {traiteListeTags(json.data) })
 }
 
 /* Adds a new tag */
@@ -123,14 +124,12 @@ function addTag() {
 	// assert(contenu != "")
 
 	// ajout du nouvel élément
-	const body = new URLSearchParams()
-	body.append("data", contenu)
 	fetch(
 		wsBase + tags,
 		{
 			method: 'POST',
 			headers: { "x-access-token": token },
-			body,
+			body: JSON.stringify({data: {id: 6777777, name: contenu }}),
 		})
 
 	// affichage du nouvel élément + supression dans la barre de recherche
@@ -159,7 +158,6 @@ function miseEnPlace() {
 	// Put the name of the current user into <h1>
 	setIdentity()
 
-	fetch("https://cawrest.ensimag.fr/bmt/dorchenc/reinit", { method: 'POST', headers: { "x-access-token": token } })
 	// Adapt the height of <div id="contents"> to the navigator window
 	setContentHeight()
 	window.addEventListener("resize", setContentHeight)
@@ -172,7 +170,6 @@ function miseEnPlace() {
 window.addEventListener('load', miseEnPlace, false)
 
 window.onload = function () {
-	console.log(document.getElementById("addTag"))
 	document.getElementById("addTag").addEventListener("click", addTag, false)
 }
 
