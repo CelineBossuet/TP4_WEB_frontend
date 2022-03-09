@@ -6,11 +6,15 @@ const whoami = "/whoami"
 const bookmarks = "/bookmarks"
 const tags = "/tags"
 
+/* TODO : ce qu'il manque :
+	- ajouter un nouvel attribut num dans traiteListeTags au noeud copie
+	- faire fonctionner POST dans addTag
+	- faire fonctionner le childNode à la fin pour faire des clicks sur beaucoup de tags !=
+*/
+
 /* Shows the identity of the current user */
 function setIdentity() {
-	//TODO 1
 	const content = document.getElementsByClassName("identity")
-
 
 	fetch(backend + whoami, { method: 'GET', headers: { "x-access-token": token } })
 		.then(res => res.json())
@@ -121,25 +125,30 @@ function listTags() {
 function addTag() {
 	const contenu = document.getElementsByTagName("input")[0].value
 	// TODO vérifier contenu
-	// assert(contenu != "")
+	if (contenu == "") {
+		alert("Aucun contenu n'a été ajouté")
+	}
+	else {
+		// ajout du nouvel élément
+		// TODO à modifier
+		fetch(
+			wsBase + tags,
+			{
+				method: 'POST',
+				headers: { "x-access-token": token },
+				body: data={'name': contenu },
+			})
 
-	// ajout du nouvel élément
-	fetch(
-		wsBase + tags,
-		{
-			method: 'POST',
-			headers: { "x-access-token": token },
-			body: JSON.stringify({data: {id: 6777777, name: contenu }}),
-		})
-
-	// affichage du nouvel élément + supression dans la barre de recherche
-	document.getElementsByTagName("input")[0].value = ""
-	listTags()
+		// affichage du nouvel élément + supression dans la barre de recherche
+		document.getElementsByTagName("input")[0].value = ""
+		listTags()
+	}
 }
 
 /* Handles the click on a tag */
 function clickTag(tag) {
-	//TODO
+	console.log("clickTag")
+	console.log(tag)
 }
 
 /* Performs the modification of a tag */
@@ -170,7 +179,18 @@ function miseEnPlace() {
 window.addEventListener('load', miseEnPlace, false)
 
 window.onload = function () {
+	// click sur new tag
 	document.getElementById("addTag").addEventListener("click", addTag, false)
+
+	// click sur un item
+	const items = document.querySelector("#items").childNodes
+	console.log(items)
+	for (let i = 0; i < items.length; i ++){
+		let item = items[i]
+		console.log("aaa")
+		console.log(item)
+		item.addEventListener("click", () => clickTag(item))
+	}
 }
 
 
