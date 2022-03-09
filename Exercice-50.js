@@ -184,10 +184,17 @@ window.onload = function () {
 
 	// click sur un item
 	const items = document.querySelectorAll("#items div")
-	console.log(document.querySelectorAll("#items"))
+	console.log(document.querySelector("#items"))
+	console.log(document.querySelector("#items").childElementCount)
+	console.log(document.querySelector("#items").childNodes)
+	console.log(document.querySelector("#items > *.item"))
+	console.log(document.querySelector("#items > div"))
+
+
+
 	console.log(items)
 
-	for (item in items.values()){
+	for (let item in items.values()){
 		console.log("aaa")
 		console.log(item)
 		item.addEventListener("click", () => clickTag(item))
