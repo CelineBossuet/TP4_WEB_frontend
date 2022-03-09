@@ -7,7 +7,7 @@ const bookmarks = "/bookmarks"
 const tags = "/tags"
 
 /* TODO : ce qu'il manque :
-	- ajouter un nouvel attribut num dans traiteListeTags au noeud copie
+	- ajouter un nouvel attribut num dans traiteListeTags au noeud copie DONE
 	- faire fonctionner POST dans addTag
 	- faire fonctionner le childNode à la fin pour faire des clicks sur beaucoup de tags !=
 */
@@ -94,9 +94,12 @@ function traiteListeTags(liste) {
 
 		// change la classe de copie
 		copie.className = "item tag"
-
-		// TODO ajouter un nouvel attribut num
-		//copie.setAttribute(num, liste[item].id)
+		
+		
+		
+		// DONE ajouter un nouvel attribut num
+		let num;
+		copie.setAttribute(num, liste[item].id)
 
 		// ajoute à l'élément d'id items
 		document.getElementById("items").appendChild(copie)
@@ -124,7 +127,8 @@ function listTags() {
 /* Adds a new tag */
 function addTag() {
 	const contenu = document.getElementsByTagName("input")[0].value
-	// TODO vérifier contenu
+	console.log("addTag")
+	// TODO vérifier contenu SEEMS LIKE DONE FOR ME
 	if (contenu == "") {
 		alert("Aucun contenu n'a été ajouté")
 	}
@@ -139,9 +143,10 @@ function addTag() {
 				body: data={'name': contenu },
 			})
 
+		listTags()
 		// affichage du nouvel élément + supression dans la barre de recherche
 		document.getElementsByTagName("input")[0].value = ""
-		listTags()
+		
 	}
 }
 
@@ -149,6 +154,9 @@ function addTag() {
 function clickTag(tag) {
 	console.log("clickTag")
 	console.log(tag)
+	if(document.getElementById("tag")[0].selected!=0){ //TODO condition
+
+	}
 }
 
 /* Performs the modification of a tag */
