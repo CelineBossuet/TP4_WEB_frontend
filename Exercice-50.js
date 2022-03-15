@@ -65,10 +65,54 @@ function selectObjectType(type) {
     
 }
 
+function traiteListBookmark(data){
+    data.forEach((element) => {
+        const copieNode = document.getElementsByClassName("model bookmark")[0].cloneNode(true)
+        copieNode.children[0].textContent = element['title']
+        copieNode.children[1].href = element['link']
+        copieNode.children[1].textContent = element['link']
+        copieNode.children[2].textContent = element['description']
+        copieNode.setAttribute("num", element['id'])
+        const ul = copieNode.children[3]
+        ul.className = "tags";
+        element['tags'].forEach(
+                (tag) =>
+        {
+            const li = document.createElement("li");
+            const text = document.createTextNode(tag['name']);
+            li.appendChild(text);
+            ul.appendChild(li);
+        }
+        )
+        copieNode.appendChild(ul)
+        copieNode.className = "item bookmark"
+        items.appendChild(copieNode)})
+}
+
 /* Loads the list of all bookmarks and displays them */
 function listBookmarks() {
 	console.log("listBookmarks called")
-	//TODO
+	
+	const items = document.getElementById("items")
+	if(items !=null){
+		removeAll(items)
+	}
+
+	fetch(wsBase+bookmarks, {method: 'GET', "headers": {
+		"Content-Type": "application/x-www-form-urlencoded",
+		"x-access-token": token,
+		"Accept": "application/json, text/plain, */*"
+	}})
+		.then(res => res.json())
+		.then(json => {traiteListBookmark(json.data)})
+		.then(()=>  {
+			console.log("chargement du click")
+			document.querySelectorAll(".item.bookmark").forEach(
+				book => {book.addEventListener('click', event =>clickBookmark(book), false)}
+			)
+		})
+
+
 }
 
 // fonction qui retire tous les enfants d'un noeud
@@ -78,27 +122,7 @@ function removeAll(node) {
 	}
 }
 
-/* fonction qui permet de traiter la liste de tags obtenue dans l'objet json d'un fetch */
-function traiteListeTags(liste) {
-	for (item in liste) {
-		// copie le model
-		let copie = document.getElementById("models").getElementsByClassName("model tag")[0].cloneNode(true)
 
-		// retire l'ancien nom et ajoute le nouveau
-		removeAll(copie.getElementsByTagName("h2")[0])
-		copie.getElementsByTagName("h2")[0].appendChild(document.createTextNode(liste[item].name))
-
-		// change la classe de copie
-		copie.className = "item tag"
-		
-		// DONE ajouter un nouvel attribut num
-		copie.setAttribute("num", liste[item].id)
-		console.log(copie)
-
-		// ajoute à l'élément d'id items
-		document.getElementById("items").appendChild(copie)
-	}
-}
 
 /* Loads the list of all tags and displays them */
 function listTags() {
@@ -218,6 +242,46 @@ function clickTag(tag) {
         tag.appendChild(document.getElementById("suppression"))
     }
 }
+
+function clickBookmark(bookmark){
+	console.log("click bookmark")
+	bookmark.className="item selected"
+	let oldItem =0
+	if(document.querySelector(".item.selected")!=null){
+		oldItem=document.querySelector(".item.selected")
+	}
+
+	//cas on n'avait pas de bookmark
+	if(oldItem===0){
+       	const modification = document.createElement("INPUT")
+        modification.setAttribute("id", "modification")
+        modification.setAttribute("type", "button")
+        modification.setAttribute("value", "modify name")
+        modification.setAttribute("onclick", "modifyTag")
+        modification.onclick = modifyBookmark
+
+        const suppression = document.createElement("INPUT")
+        suppression.setAttribute("id", "suppression")
+        suppression.setAttribute("type", "button")
+        suppression.setAttribute("value", "Remove bookmark")
+        suppression.setAttribute("onclick", "removeBookmark")
+        suppression.onclick = removeBookmark
+
+        bookmark.appendChild(modification)
+        bookmark.appendChild(suppression)
+	}
+	else if(bookmark !=oldItem){ //cas on click sur un autre bookmark
+		oldItem.className="item bookmark"
+		oldItem.querySelector('h2').style.display='initial'
+		//on recupère dans notre bookmark les attributs déjà crées modification et supression
+		bookmark.appendChild(document.getElementById("modification"))
+		bookmark.appendChild(document.getElementById("suppression"))
+	}
+
+}
+
+
+
 function putData(url, txt) {
     // Default options are marked with * 
     return fetch(url, {
@@ -279,6 +343,279 @@ function removeTag() {
                 console.log("error removeTag + " + error.toString())
             })
 }
+
+
+function removeBookmark(){
+	const url = wsBase + "bookmarks"
+    const bookmarkDiv = document.querySelector(".item.selected")
+    const id = bookmarkDiv.attributes['num'].nodeValue
+
+    removeData(url, id)
+            .then(setTimeout(() => {
+                listBookmarks()
+            }, 500))//pour afficher les modif après l'ajout et non pas avant. sans cette attente on ne voit pas les modif
+            
+}
+
+function modifyBookmark(){
+	const url = wsBase + "bookmarks"
+    const bookmarkDiv = document.querySelector(".item.selected")
+    const id = bookmarkDiv.attributes['num'].nodeValue
+
+    const modifiyButton = document.getElementById("modification")
+    const parentModify = modifiyButton.parentElement
+    modifiyButton.remove()
+    const form = createFormBookmark("formModifyBookmark",submitBookmarkModify)
+    parentModify.appendChild(form)
+
+    //Partie async
+    fetch(wsBase + "tags",
+            {
+                method: 'GET',
+                "headers": {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    "x-access-token": token,
+                    "Accept": "application/json, text/plain, */*"
+                }
+            }
+    )
+            .then(res => res.json())
+            .then(
+                    json => {
+                        const obj = json
+                        createCheckboxList(obj.data, form, "classListeCheckboxTags")
+                    }
+            )
+}
+
+
+const addBookmark = function () {
+    console.log("OKKK")
+    document.getElementById('addBookmarkButton').remove()
+    const items = document.getElementById("items")
+    const form = createFormBookmark("formAddBookmark",submitBookmarkADD)
+    items.prepend(form)
+    
+    //Partie async
+    fetch(wsBase + "tags",
+            {
+                method: 'GET',
+                "headers": {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    "x-access-token": token,
+                    "Accept": "application/json, text/plain, */*"
+                }
+            }
+    )
+            .then(res => res.json())
+            .then(
+                    json => {
+                        const obj = json                       
+                        createCheckboxList(obj.data,form,"classListeCheckboxTags")
+                    }
+            )
+}
+
+const isChecked = function (elemet)
+{
+  return elemet.checked;
+}
+
+const makeTagObjectForBookmark = function (id,name)
+{
+    return {
+        'id':id,
+        'name':name
+    }
+}
+const prepareBookmarkQueryObjectArray = function ()
+{
+    const cases = document.getElementsByClassName("classListeCheckboxTags")
+    const res = Array.from(cases).filter(isChecked)//ne garder que les elements checkés
+    const tabObjTag = []
+    res.forEach(e=>{
+        tabObjTag.push(new makeTagObjectForBookmark(e.id,e.value))
+    })
+    return tabObjTag
+}
+
+const makeBookmarkObjcet = function ()
+{
+    const titleElement = document.getElementById("bookmarkInputTextsID")
+    const linkElement = document.getElementById("bookmarkInputURLID")
+    const descriptionElement = document.getElementById("bookmarkInputDescriptionID")
+    
+    let bookmarkID=0
+    if(document.getElementsByClassName("item selected")[0]!=undefined)
+    {
+        bookmarkID = document.getElementsByClassName("item selected")[0].getAttribute("num")
+    }
+    else
+    {
+        bookmarkID = 0
+    }
+
+    return {
+        'id': bookmarkID,
+        'title': titleElement.value,
+        'link': linkElement.value,
+        'description': descriptionElement.value,
+        'tags': prepareBookmarkQueryObjectArray()
+    }
+}
+const submitBookmarkADD = function ()
+{
+    //traitement fetch
+    createButtonAddBookmark()
+    const objectBookmark = makeBookmarkObjcet()
+
+    fetch(wsBase + "bookmarks",
+            {
+                method: 'POST', // *GET, POST, PUT, DELETE, etc.
+                "headers":
+                        {
+                            "x-access-token": token,
+                            "Content-Type": "application/x-www-form-urlencoded",
+                            "Accept": "application/json, text/plain, */*"
+                        },
+                //"body": `data={${JSON.stringify(objectBookmark)}}`
+                body: new URLSearchParams({
+                    "data": JSON.stringify(
+                            {
+                                "title": objectBookmark['title'],
+                                "link": objectBookmark['link'],
+                                "description": objectBookmark['description'],
+                                "tags": objectBookmark['tags']
+                            })})
+            }
+    )
+    .then(res => res.json())    
+    .then(document.getElementById("formAddBookmark").remove())
+    .then(setTimeout(() => { listBookmarks()}, 1000))
+}
+
+const submitBookmarkModify = function ()
+{
+    //traitement fetch
+    const objectBookmark = makeBookmarkObjcet()
+    const id = objectBookmark['id']
+    fetch(wsBase + "bookmarks/"+id,
+            {
+                method: 'PUT', // *GET, POST, PUT, DELETE, etc.
+                "headers":
+                        {
+                            "x-access-token": token,
+                            "Content-Type": "application/x-www-form-urlencoded",
+                            "Accept": "application/json, text/plain, */*"
+                        },
+                //"body": `data={${JSON.stringify(objectBookmark)}}`
+                body: new URLSearchParams({
+                    "data": JSON.stringify(
+                            {
+                                //"id":objectBookmark['id'],
+                                "title": objectBookmark['title'],
+                                "link": objectBookmark['link'],
+                                "description": objectBookmark['description'],
+                                "tags": objectBookmark['tags']
+                            })})
+            }
+    )
+    .then(res => res.json())    
+    .then(document.getElementById("formModifyBookmark").remove())
+    .then(setTimeout(() => { listBookmarks()}, 1000))
+}
+
+function createFormBookmark(id,action) {
+    
+    const form = document.createElement("form");
+    form.setAttribute("id",id)
+    // create a submit button
+    const soumission = createButton("bookmarkSubmitTextsID", "Submit", action)//{submitBookmarkADD,submitBookmarkModify}
+
+    // Create an input element for Bookmark Name
+    const inputText = createTextInput("bookmarkInputTextsID", "Bookmark title here ..")
+
+    // Create an input element for Bookmark URL
+    const inputURL = createTextInput("bookmarkInputURLID", "link")
+
+    // Create an input element for Bookmark description
+    const inputDescription = createTextInput("bookmarkInputDescriptionID", "bookmark description")
+    
+    //Manque add tags ici
+    
+    form.appendChild(soumission)
+    form.appendChild(inputText)
+    form.appendChild(inputURL)
+    form.appendChild(inputDescription)
+    
+    return form
+}
+
+
+
+const createTextInput = function (id,placeholder)
+{
+    // Create an text input element 
+    const inputTextElement = document.createElement("input")
+    inputTextElement.setAttribute("id",id )
+    inputTextElement.setAttribute("type", "text")
+    inputTextElement.setAttribute("placeholder", placeholder)
+
+    //inputTextElement.setAttribute("name", "FullName")
+    return inputTextElement
+}
+const createButtonAddBookmark = function ()
+{
+    const items = document.getElementById("items")
+    const addButton = createButton("addBookmarkButton", "Add bookmark",addBookmark)
+    addButton.className = "tags"
+    items.prepend(addButton)
+}
+
+const createButton = function (id,value,fonction)
+{
+    const myButton = document.createElement("INPUT");
+    myButton.setAttribute("id", id)
+    myButton.setAttribute("type", "button");
+    myButton.setAttribute("value", value);
+    myButton.setAttribute("onclick",fonction);
+    myButton.onclick = fonction
+    return myButton
+}
+
+//returns le formulaire mis à jour
+const createCheckboxElementWithLabel= function (formulaire,identifiant,valeur,classname)
+{
+    const checkbox = document.createElement("input");
+    const label = document.createElement("label");
+    checkbox.setAttribute("type","checkbox")
+    checkbox.setAttribute("name",identifiant)
+    checkbox.setAttribute("id",identifiant)
+    checkbox.setAttribute("value",valeur)
+    checkbox.className=classname
+
+    label.setAttribute("for",identifiant)
+    label.textContent=valeur
+    
+    formulaire.appendChild(checkbox)
+    formulaire.appendChild(label)
+    return formulaire
+}
+
+//Création liste checkbox pour le formulaire
+const createCheckboxList= function (tableauTags,formulaire,className)
+{
+    tableauTags.forEach(
+    (tag) =>
+        {
+            createCheckboxElementWithLabel(formulaire, tag['id'], tag['name'], className)
+        }
+    )
+    return formulaire
+}
+
+
+
 /* On document loading */
 function miseEnPlace() {
 
