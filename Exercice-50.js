@@ -8,11 +8,7 @@ const selected = "selected"
 const itemTag = "item tag"
 const classListeCheckBoxTags = "classListeCheckboxTags"
 
-/* TODO : ce qu'il manque :
-	- ajouter un nouvel attribut num dans traiteListeTags au noeud copie DONE
-	- faire fonctionner POST dans addTag
-	- faire fonctionner le childNode à la fin pour faire des clicks sur beaucoup de tags !=
-*/
+
 
 /* Shows the identity of the current user */
 function setIdentity() {
@@ -471,7 +467,7 @@ const submitBookmarkADD = function ()
 
     fetch(wsBase + "bookmarks",
             {
-                method: 'POST', // *GET, POST, PUT, DELETE, etc.
+                method: 'POST', 
                 "headers":
                         {
                             "x-access-token": token,
@@ -501,7 +497,7 @@ const submitBookmarkModify = function ()
     const id = objectBookmark['id']
     fetch(wsBase + "bookmarks/"+id,
             {
-                method: 'PUT', // *GET, POST, PUT, DELETE, etc.
+                method: 'PUT', 
                 "headers":
                         {
                             "x-access-token": token,

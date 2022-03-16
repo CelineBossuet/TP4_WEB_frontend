@@ -1,3 +1,8 @@
+stages:
+  - test
+  - deploy
+
+
 jobcypress:
   tags:
     - docker  # Comme on utilise une image pour isoler on doit utiliser un runner docker 
@@ -7,3 +12,21 @@ jobcypress:
     - ./node_modules/.bin/serve & # Lance le serveur
     - ./node_modules/.bin/cypress run # Lance les tests
 #    - kill -9 $(ps | grep node | awk '{print $1}') # Cette ligne pourrait permettre de tuer serve
+
+pages:
+  stage: deploy
+  #starting docker image
+  image: debian:bullseye
+  #use shared runners
+  tags:
+    - docker
+  #command to run in the container
+  script:
+    - mkdir -p public #create folder
+    - cp *.html public/ #copy html files
+    - cp *.css public/ #copy css files
+    - cp *.js public/ #copy js files
+  artifacts:
+    #get website url
+    paths:
+      - public
