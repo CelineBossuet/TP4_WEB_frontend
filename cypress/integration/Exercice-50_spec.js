@@ -8,7 +8,7 @@ describe('test exo 50', () => {
         // on click sur le premier enfant de items qui correspond donc au 1er tag
         cy.get('#items').children().first().click()
         //on supprime l'ancien nom du tag
-        cy.get('"line').clear()
+        cy.get('#line').clear()
         //on renomme le tag
         cy.get('#line').type("JAVASCRIPT!!!!!!!!!!!")
         //on actualise le tag avec le nouveau nom
