@@ -14,7 +14,8 @@ describe('test exo 50', () => {
         //on actualise le tag avec le nouveau nom
         cy.get("#modification").click()
         //on vérifie que le tag a bien été modifé
-        cy.get('#items').contains("JAVASCRIPT!!!!!!!!!!!")
+        cy.get('#items').contains("JAVASCRIPT!!!!!!!!!!!").should('have.length', 21)
+
         
     })
 })
